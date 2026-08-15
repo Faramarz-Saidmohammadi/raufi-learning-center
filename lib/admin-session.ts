@@ -1,5 +1,4 @@
 import { cookies } from "next/headers";
-import { getRuntimeEnv } from "@/lib/runtime-env";
 
 export type AdminUser = {
   displayName: string;
@@ -34,13 +33,12 @@ function base64UrlDecode(value: string): Uint8Array | null {
 }
 
 async function configuration(): Promise<AdminConfiguration> {
-  const env = await getRuntimeEnv();
-  const emails = String(env.ADMIN_EMAILS ?? "")
+  const emails = String(process.env.ADMIN_EMAILS ?? "")
     .split(",")
     .map((value) => value.trim().toLowerCase())
     .filter(Boolean);
-  const passwordHash = String(env.ADMIN_PASSWORD_HASH ?? "").trim();
-  const sessionSecret = String(env.ADMIN_SESSION_SECRET ?? "").trim();
+  const passwordHash = String(process.env.ADMIN_PASSWORD_HASH ?? "").trim();
+  const sessionSecret = String(process.env.ADMIN_SESSION_SECRET ?? "").trim();
   return {
     configured:
       emails.length > 0 &&
@@ -73,7 +71,7 @@ async function validSignature(secret: string, value: string, signature: Uint8Arr
     false,
     ["verify"],
   );
-  return crypto.subtle.verify("HMAC", key, signature, encoder.encode(value));
+  return crypto.subtle.verify("HMAC", key, new Uint8Array(signature), encoder.encode(value));
 }
 
 async function passwordMatches(password: string, encodedHash: string): Promise<boolean> {
@@ -100,7 +98,7 @@ async function passwordMatches(password: string, encodedHash: string): Promise<b
     ["deriveBits"],
   );
   const actual = new Uint8Array(await crypto.subtle.deriveBits(
-    { name: "PBKDF2", hash: "SHA-256", salt, iterations },
+    { name: "PBKDF2", hash: "SHA-256", salt: new Uint8Array(salt), iterations },
     key,
     256,
   ));

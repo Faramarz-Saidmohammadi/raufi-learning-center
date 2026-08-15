@@ -23,7 +23,7 @@ A production-oriented education website and admissions CMS for Raufi Learning Ce
 - Application-owned administrator sessions with PBKDF2 password verification and signed cookies
 - Visual page builder for creating, editing, reordering, publishing and deleting pages and sections
 - Trilingual section content, calls to action, navigation labels, themes and reusable JSON item collections
-- Media library backed by Cloudflare R2 with file-type/size validation and protected deletion
+- Media library backed by Vercel Blob with file-type/size validation and protected deletion
 - Uploaded-image references are checked before an asset can be removed
 - Trilingual CRUD for programmes, announcements, schedules and FAQs
 - Publish/draft controls, ordering, featured programmes and duplicate-slug protection
@@ -38,12 +38,12 @@ A production-oriented education website and admissions CMS for Raufi Learning Ce
 | Layer | Implementation |
 | --- | --- |
 | UI | Next.js App Router, React 19, responsive CSS |
-| Runtime | Vinext on Cloudflare Workers |
-| Persistence | Cloudflare D1 with Drizzle ORM plus Cloudflare R2 media storage |
+| Runtime | Native Next.js App Router on Vercel Functions |
+| Persistence | Neon Postgres with Drizzle ORM plus Vercel Blob media storage |
 | Authentication | PBKDF2 password verification, signed HTTP-only sessions and administrator allowlist |
 | Validation | Server-side parsing, normalization, length limits and explicit error codes |
 | SEO | Metadata API, Open Graph, JSON-LD, sitemap and robots routes |
-| Quality | ESLint, bounded production build, artifact validation and Node test runner |
+| Quality | TypeScript, ESLint and production Next.js build validation |
 
 ## Security and data integrity
 
@@ -60,19 +60,21 @@ A production-oriented education website and admissions CMS for Raufi Learning Ce
 
 ## Local development
 
-Requirements: Node.js `>=22.13.0`, Linux, GNU `timeout`, `flock` and `curl`.
+Requirements: Node.js `>=22.13.0`, a Neon Postgres database and a Vercel Blob store.
 
 ```bash
 npm ci
 npm run dev
 ```
 
-Configure the administrator allowlist, password hash, session secret and public site URL through environment variables:
+Copy `.env.example` to `.env.local`, then configure the database, Blob store, administrator credentials and public site URL:
 
 ```text
 ADMIN_EMAILS=admin@example.com,owner@example.com
 ADMIN_PASSWORD_HASH=pbkdf2-sha256$210000$<salt>$<derived-key>
 ADMIN_SESSION_SECRET=<at-least-32-random-characters>
+DATABASE_URL=postgresql://user:password@host/database?sslmode=require
+BLOB_READ_WRITE_TOKEN=vercel_blob_rw_<token>
 NEXT_PUBLIC_SITE_URL=https://your-domain.example
 ```
 
@@ -84,7 +86,7 @@ ADMIN_PASSWORD="your-strong-password" npm run admin:hash-password
 
 ## Database workflow
 
-Schema definitions live in `db/schema.ts`. Generate a new immutable migration after editing the schema:
+Schema definitions live in `db/schema.ts`. The application safely creates missing tables on the first database-backed request. Generate an immutable migration after changing the schema:
 
 ```bash
 npm run db:generate
@@ -99,17 +101,4 @@ npm run lint
 npm test
 ```
 
-`npm test` performs a full production build, validates the deployable Worker artifact, initializes a real in-memory SQLite database from every migration, and verifies:
-
-- public trilingual rendering and structured SEO data;
-- admissions validation, phone normalization and consent persistence;
-- unauthenticated, unauthorized and administrator API boundaries;
-- CRUD for all four CMS content types;
-- page creation, section creation/reordering/deletion and dynamic public-page rendering;
-- R2 media upload, public delivery, reference protection and deletion;
-- CMS-driven homepage section updates;
-- duplicate-slug validation and settings persistence;
-- admissions status and private-note updates;
-- audit history and deletion behavior.
-
-Browser QA additionally covers the real preview, programme interactions, English/Pashto switching, RTL/LTR document state, visual integrity and site-origin console health.
+`npm test` runs TypeScript checking, ESLint and a production Next.js build. Production verification should also cover sign-in, content CRUD, page publishing, admissions updates and Vercel Blob upload/delete behaviour.

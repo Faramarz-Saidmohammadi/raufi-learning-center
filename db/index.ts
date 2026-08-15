@@ -1,15 +1,25 @@
-import { drizzle } from "drizzle-orm/d1";
-import { getRuntimeEnv } from "@/lib/runtime-env";
+import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-http";
+import type { NeonHttpDatabase } from "drizzle-orm/neon-http";
+import { initializeDatabase } from "./bootstrap";
 import * as schema from "./schema";
 
+let database: NeonHttpDatabase<typeof schema> | undefined;
+let initialization: Promise<void> | undefined;
+
 export async function getDb() {
-  const env=await getRuntimeEnv();
-  const database=env.DB as Parameters<typeof drizzle>[0]|undefined;
-  if (!database) {
-    throw new Error(
-      "Cloudflare D1 binding `DB` is unavailable. Configure the database binding before starting the application."
-    );
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error("DATABASE_URL is unavailable. Connect a Neon Postgres database to this Vercel project.");
   }
 
-  return drizzle(database, { schema });
+  if (!database) database = drizzle(neon(connectionString), { schema });
+  if (!initialization) {
+    initialization = initializeDatabase(database).catch((error) => {
+      initialization = undefined;
+      throw error;
+    });
+  }
+  await initialization;
+  return database;
 }

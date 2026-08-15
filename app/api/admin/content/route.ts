@@ -2,6 +2,7 @@ import { and, asc, desc, eq, ne } from "drizzle-orm";
 import { getDb } from "@/db";
 import { announcements, auditLogs, classSchedules, courses, faqs, inquiries, mediaAssets, pageSections, sitePages, siteSettings } from "@/db/schema";
 import { requireAdminApi } from "@/lib/admin-auth";
+import { fallbackAnnouncements, fallbackCourses, fallbackFaqs, fallbackPages, fallbackSections, fallbackSettings } from "@/lib/content";
 
 const asText=(value:unknown,max=1000)=>String(value??"").trim().slice(0,max);
 const asBool=(value:unknown)=>value===true||value==="true"||value===1;
@@ -30,7 +31,7 @@ export async function GET(){
     db.select().from(pageSections).orderBy(asc(pageSections.sortOrder)),
     db.select().from(mediaAssets).orderBy(desc(mediaAssets.createdAt)).limit(250),
   ]);
-  return Response.json({courses:courseRows,announcements:announcementRows,schedules:scheduleRows,faqs:faqRows,inquiries:inquiryRows,activity:activityRows,pages:pageRows,sections:sectionRows,media:mediaRows.map(row=>({...row,url:`/api/media/${row.id}`})),settings:Object.fromEntries(settingRows.map(row=>[row.key,row.value]))},{headers:{"cache-control":"no-store"}});
+  return Response.json({courses:courseRows.length?courseRows:fallbackCourses,announcements:announcementRows.length?announcementRows:fallbackAnnouncements,schedules:scheduleRows,faqs:faqRows.length?faqRows:fallbackFaqs,inquiries:inquiryRows,activity:activityRows,pages:pageRows.length?pageRows:fallbackPages,sections:sectionRows.length?sectionRows:fallbackSections,media:mediaRows.map(row=>({...row,url:`/api/media/${row.id}`})),settings:{...fallbackSettings,...Object.fromEntries(settingRows.map(row=>[row.key,row.value]))}},{headers:{"cache-control":"no-store"}});
 }
 
 export async function POST(request:Request){

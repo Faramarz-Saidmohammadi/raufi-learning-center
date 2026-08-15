@@ -1,7 +1,6 @@
-import { sql } from "drizzle-orm";
-import { integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { boolean, integer, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 
-export const courses = sqliteTable("courses", {
+export const courses = pgTable("courses", {
   id: text("id").primaryKey(),
   slug: text("slug").notNull().unique(),
   titleFa: text("title_fa").notNull(),
@@ -27,14 +26,14 @@ export const courses = sqliteTable("courses", {
   outcomesPs: text("outcomes_ps").notNull().default(""),
   icon: text("icon").notNull().default("book"),
   accent: text("accent").notNull().default("#1261a0"),
-  featured: integer("featured", { mode: "boolean" }).notNull().default(false),
-  published: integer("published", { mode: "boolean" }).notNull().default(true),
+  featured: boolean("featured").notNull().default(false),
+  published: boolean("published").notNull().default(true),
   sortOrder: integer("sort_order").notNull().default(0),
-  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
 });
 
-export const announcements = sqliteTable("announcements", {
+export const announcements = pgTable("announcements", {
   id: text("id").primaryKey(),
   titleFa: text("title_fa").notNull(),
   titleEn: text("title_en").notNull(),
@@ -42,13 +41,13 @@ export const announcements = sqliteTable("announcements", {
   excerptFa: text("excerpt_fa").notNull(),
   excerptEn: text("excerpt_en").notNull(),
   excerptPs: text("excerpt_ps").notNull().default(""),
-  published: integer("published", { mode: "boolean" }).notNull().default(true),
-  publishedAt: text("published_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  published: boolean("published").notNull().default(true),
+  publishedAt: timestamp("published_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
 });
 
-export const inquiries = sqliteTable("inquiries", {
+export const inquiries = pgTable("inquiries", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   phone: text("phone").notNull(),
@@ -60,11 +59,11 @@ export const inquiries = sqliteTable("inquiries", {
   consentAt: text("consent_at").notNull().default(""),
   adminNote: text("admin_note").notNull().default(""),
   status: text("status").notNull().default("new"),
-  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
 });
 
-export const classSchedules = sqliteTable("class_schedules", {
+export const classSchedules = pgTable("class_schedules", {
   id: text("id").primaryKey(),
   courseTitleFa: text("course_title_fa").notNull(),
   courseTitleEn: text("course_title_en").notNull(),
@@ -77,13 +76,13 @@ export const classSchedules = sqliteTable("class_schedules", {
   seatsFa: text("seats_fa").notNull().default(""),
   seatsEn: text("seats_en").notNull().default(""),
   seatsPs: text("seats_ps").notNull().default(""),
-  published: integer("published", { mode: "boolean" }).notNull().default(true),
+  published: boolean("published").notNull().default(true),
   sortOrder: integer("sort_order").notNull().default(0),
-  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
 });
 
-export const faqs = sqliteTable("faqs", {
+export const faqs = pgTable("faqs", {
   id: text("id").primaryKey(),
   questionFa: text("question_fa").notNull(),
   questionEn: text("question_en").notNull(),
@@ -91,29 +90,29 @@ export const faqs = sqliteTable("faqs", {
   answerFa: text("answer_fa").notNull(),
   answerEn: text("answer_en").notNull(),
   answerPs: text("answer_ps").notNull().default(""),
-  published: integer("published", { mode: "boolean" }).notNull().default(true),
+  published: boolean("published").notNull().default(true),
   sortOrder: integer("sort_order").notNull().default(0),
-  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
 });
 
-export const siteSettings = sqliteTable("site_settings", {
+export const siteSettings = pgTable("site_settings", {
   key: text("key").primaryKey(),
   value: text("value").notNull(),
-  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
 });
 
-export const auditLogs = sqliteTable("audit_logs", {
+export const auditLogs = pgTable("audit_logs", {
   id: text("id").primaryKey(),
   action: text("action").notNull(),
   entity: text("entity").notNull(),
   entityId: text("entity_id").notNull().default(""),
   summary: text("summary").notNull().default(""),
   actorEmail: text("actor_email").notNull(),
-  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
 });
 
-export const sitePages = sqliteTable("site_pages", {
+export const sitePages = pgTable("site_pages", {
   id: text("id").primaryKey(),
   slug: text("slug").notNull().unique(),
   titleFa: text("title_fa").notNull(),
@@ -125,15 +124,15 @@ export const sitePages = sqliteTable("site_pages", {
   navLabelFa: text("nav_label_fa").notNull().default(""),
   navLabelEn: text("nav_label_en").notNull().default(""),
   navLabelPs: text("nav_label_ps").notNull().default(""),
-  isHome: integer("is_home", { mode: "boolean" }).notNull().default(false),
-  showInNav: integer("show_in_nav", { mode: "boolean" }).notNull().default(true),
-  published: integer("published", { mode: "boolean" }).notNull().default(true),
+  isHome: boolean("is_home").notNull().default(false),
+  showInNav: boolean("show_in_nav").notNull().default(true),
+  published: boolean("published").notNull().default(true),
   sortOrder: integer("sort_order").notNull().default(0),
-  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
 });
 
-export const pageSections = sqliteTable("page_sections", {
+export const pageSections = pgTable("page_sections", {
   id: text("id").primaryKey(),
   pageId: text("page_id").notNull(),
   sectionKey: text("section_key").notNull(),
@@ -162,14 +161,14 @@ export const pageSections = sqliteTable("page_sections", {
   navLabelPs: text("nav_label_ps").notNull().default(""),
   itemsJson: text("items_json").notNull().default("[]"),
   theme: text("theme").notNull().default("light"),
-  showInNav: integer("show_in_nav", { mode: "boolean" }).notNull().default(false),
-  published: integer("published", { mode: "boolean" }).notNull().default(true),
+  showInNav: boolean("show_in_nav").notNull().default(false),
+  published: boolean("published").notNull().default(true),
   sortOrder: integer("sort_order").notNull().default(0),
-  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
 },table=>[uniqueIndex("page_sections_page_key_unique").on(table.pageId,table.sectionKey)]);
 
-export const mediaAssets = sqliteTable("media_assets", {
+export const mediaAssets = pgTable("media_assets", {
   id: text("id").primaryKey(),
   objectKey: text("object_key").notNull().unique(),
   filename: text("filename").notNull(),
@@ -179,5 +178,5 @@ export const mediaAssets = sqliteTable("media_assets", {
   altEn: text("alt_en").notNull().default(""),
   altPs: text("alt_ps").notNull().default(""),
   uploadedBy: text("uploaded_by").notNull(),
-  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
 });

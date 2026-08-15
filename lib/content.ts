@@ -134,13 +134,14 @@ export async function getPublicContent(): Promise<PublicContent> {
       db.select().from(sitePages).where(eq(sitePages.published,true)).orderBy(asc(sitePages.sortOrder)),
       db.select().from(pageSections).where(eq(pageSections.published,true)).orderBy(asc(pageSections.sortOrder)),
     ]);
+    const homeSections=sectionRows.filter(section=>section.pageId===(pageRows.find(page=>page.isHome)?.id??"home"));
     return {
       courses:courseRows.length?courseRows:fallbackCourses,
       announcements:announcementRows.length?announcementRows:fallbackAnnouncements,
       schedules:scheduleRows,
       faqs:faqRows.length?faqRows:fallbackFaqs,
       pages:pageRows.length?pageRows:fallbackPages,
-      sections:sectionRows.filter(section=>section.pageId===(pageRows.find(page=>page.isHome)?.id??"home")),
+      sections:homeSections.length?homeSections:fallbackSections,
       settings:{...fallbackSettings,...Object.fromEntries(settingRows.map(row=>[row.key,row.value]))},
     };
   } catch {

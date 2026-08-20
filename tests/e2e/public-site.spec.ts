@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 async function switchToEnglish(page: import("@playwright/test").Page) {
-  await page.getByRole("button", { name: /دری/ }).click();
+  await page.getByRole("button", { name: /^دری⌄?$/ }).click();
   await page.getByRole("button", { name: "English", exact: true }).click();
 }
 

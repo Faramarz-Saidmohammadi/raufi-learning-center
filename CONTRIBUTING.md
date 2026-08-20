@@ -12,9 +12,8 @@
 
 ```bash
 npm ci
-npm run typecheck
-npm run lint
-npm run build
+npm run check
+npm run test:e2e
 ```
 
 Database-backed behaviour must also be exercised against a non-production Neon database when the change affects persistence, migrations, admissions, CMS CRUD, or publishing.

@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   quality:
-    name: Typecheck, lint and build
+    name: Typecheck, lint, test, audit and build
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -38,6 +38,12 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Unit tests
+        run: npm test
+
+      - name: Production dependency audit
+        run: npm audit --omit=dev --audit-level=high
+
       - name: Production build
         run: npm run build
         env:
@@ -47,3 +53,20 @@ jobs:
           ADMIN_SESSION_SECRET: ci-placeholder-secret-that-is-at-least-32-characters
           BLOB_READ_WRITE_TOKEN: vercel_blob_rw_placeholder
           NEXT_PUBLIC_SITE_URL: https://example.com
+
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser tests
+        run: npm run test:e2e
+        env:
+          NEXT_PUBLIC_SITE_URL: http://127.0.0.1:3000
+
+      - name: Upload browser report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+          if-no-files-found: ignore
+          retention-days: 7

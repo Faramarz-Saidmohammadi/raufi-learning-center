@@ -41,7 +41,7 @@ The project combines a public student-facing experience with a protected adminis
 | Authentication | PBKDF2 password verification, signed HTTP-only sessions, administrator allowlist |
 | Validation | Server-side parsing, normalization, limits, and explicit error responses |
 | SEO | Next.js Metadata API, Open Graph, JSON-LD, sitemap, robots |
-| Quality | TypeScript, ESLint, production build validation, GitHub Actions |
+| Quality | TypeScript, ESLint, Vitest, Playwright, dependency auditing, production builds, GitHub Actions |
 
 ## Architecture and security
 
@@ -107,12 +107,11 @@ Treat deployed migrations as immutable. Introduce a new migration and explicit b
 Before merge:
 
 ```bash
-npm run typecheck
-npm run lint
-npm run build
+npm run check
+npm run test:e2e
 ```
 
-The GitHub Actions workflow runs the same core quality checks for pull requests and updates to `main`.
+The local quality gate runs TypeScript validation, ESLint, unit tests, a production build, and a high-severity production dependency audit. GitHub Actions also runs Chromium browser tests for desktop and mobile workflows on pull requests and updates to `main`.
 
 Changes affecting database persistence, authentication, publishing, admissions, or Vercel Blob should additionally be exercised against the corresponding non-production service dependencies.
 
